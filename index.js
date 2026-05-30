@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const cors=require('cors')
 const dotenv=require('dotenv')
@@ -89,6 +89,44 @@ res.send(result)
         message:'Internal Server Error'
      })   
     }
+  })
+
+  // get data by id
+
+  app.get('/products/:id',async(req,res)=>{
+   try{
+     const id = req.params.id
+    const query ={
+      _id:new ObjectId(id)
+    }
+    const result=await collection.findOne(query)
+    res.send(result)
+   }catch(error){
+     res.status(500).send({
+        success:false,
+        message:'Internal Server Error'
+     })   
+   }
+  })
+  // related product
+  app.get('/related-products/:id',async(req,res)=>{
+   try{
+     const id = req.params.id
+    const query ={
+      _id:new ObjectId(id)
+    }
+    const currentProduct=await collection.findOne(query)
+    const relatedProducts=await collection.find({
+      category:currentProduct.category,
+      _id:{$ne:query._id}
+       }).limit(4).toArray()
+    res.send(relatedProducts)
+   }catch(error){
+     res.status(500).send({
+        success:false,
+        message:'Internal Server Error'
+     })   
+   }
   })
    
     await client.db("admin").command({ ping: 1 });
