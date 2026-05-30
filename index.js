@@ -32,11 +32,12 @@ async function run() {
       const category = req.query.category;
       const brand = req.query.brand;
       const color = req.query.color;
-      console.log(category);
-      console.log(brand);
-      console.log(color);
+      const sort = req.query.sort ;
+     
+     
       
       let query={}
+      let sortOption ={}
       if (search) {
   query.name = { $regex: search, $options: 'i' };
 }
@@ -47,10 +48,26 @@ if (category) {
 if (brand) {
       query.brand = brand;
     }
+    if(sort === 'price-low-high'){
+      sortOption={price : 1}
+    }
+    if(sort === 'price-high-low'){
+      sortOption={price : -1}
+    }
+      if (sort === 'rating') {
+    sortOption = { rating: -1 }
+  }
+  if(sort === 'name-asc'){
+    sortOption={name:1}
+  }
+  if(sort === 'name-desc'){
+    sortOption={name: -1}
+  }
+
       const limit=12
       const skip=(page-1)* limit
 
-        const cursor=await collection.find(query).skip(skip).limit(limit)
+        const cursor=await collection.find(query).sort(sortOption).skip(skip).limit(limit)
         const result=await cursor.toArray()
 res.send(result)
     }catch(error){
